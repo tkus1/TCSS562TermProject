@@ -1,9 +1,9 @@
 package lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import saaf.Inspector;
-import saaf.Response;
 
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -30,7 +30,8 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
      * @return HashMap that Lambda will automatically convert into JSON.
      */
     public HashMap<String, Object> handleRequest(HashMap<String, Object> request, Context context) {
-        
+        // Create logger
+        LambdaLogger logger = context.getLogger();
         //Collect initial data.
         Inspector inspector = new Inspector();
         inspector.inspectAll();
@@ -43,53 +44,19 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
                 + "! This is a custom attribute added as output from SAAF!");
         
         //Create and populate a separate response object for function output. (OPTIONAL)
-        Response response = new Response();
-        response.setValue("Hello "
-                + "! This is from a response object!");
-        
+        lambda.Response response = (lambda.Response) new lambda.Response();
         inspector.consumeResponse(response);
-        Response r = new Response();
-
+        String tableName = "tableName";//ToDo specify table name
         try
         {
             Properties properties = new Properties();
             properties.load(new FileInputStream("db.properties"));
+            DatabaseManager databaseManager = new DatabaseManager(properties, tableName);
+            databaseManager.insertTable(request);
+            ResultSet resultSet = databaseManager.getTableData(tableName);
+            response.setValue((String) request.get("Region"));
 
-            String url = properties.getProperty("url");
-            String username = properties.getProperty("username");
-            String password = properties.getProperty("password");
-            String driver = properties.getProperty("driver");
 
-            r.setValue(request.getName());
-            // Manually loading the JDBC Driver is commented out
-            // No longer required since JDBC 4
-            //Class.forName(driver);
-            Connection con = DriverManager.getConnection(url,username,password);
-
-            PreparedStatement ps1 = con.prepareStatement("insert into mytable values('" + request.getName() + "','b','c');");
-            ps1.execute();
-            ps1 = con.prepareStatement("select * from mytable;");
-            ResultSet rs1 = ps1.executeQuery();
-            LinkedList<String> ll_1 = new LinkedList<String>();
-            while (rs1.next())
-            {
-                logger.log("name=" + rs1.getString("name"));
-                ll_1.add(rs1.getString("name"));
-            }
-
-            PreparedStatement ps = con.prepareStatement("select version() as version;");
-            ResultSet rs = ps.executeQuery();
-            LinkedList<String> ll = new LinkedList<String>();
-            while (rs.next())
-            {
-                logger.log("version=" + rs.getString("version"));
-                ll.add(rs.getString("version"));
-            }
-            rs.close();
-            con.close();
-            r.setNames(ll_1);
-            r.setsqlVersion(ll);
-            System.out.println(r.getsqlVersionString());
         }
         catch (Exception e)
         {
@@ -99,7 +66,7 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
 
         //Print log information to the Lambda log as needed
         //logger.log("log message...");
-        inspector.consumeResponse(r);
+        inspector.consumeResponse(response);
         //****************END FUNCTION IMPLEMENTATION***************************
                 
         //Collect final information such as total runtime and cpu deltas.
