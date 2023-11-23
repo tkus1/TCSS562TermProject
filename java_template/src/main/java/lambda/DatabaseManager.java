@@ -6,28 +6,22 @@ import java.util.Properties;
 
 public class DatabaseManager {
 
-    private final String url;
-    private final String username;
-    private final String driver;
-    private final String tableName;
-    private final String password;
     private Connection connection;
+    private final String tableName;
     private static HashMap<String, String> S3TableMap;  //ToDo list table name in S3
 
     public DatabaseManager(Properties properties, String tableName) {
-
-        this.url = properties.getProperty("url");
-        this.username = properties.getProperty("username");
-        this.password = properties.getProperty("password");
-        this.driver = properties.getProperty("driver");
-        this.tableName = tableName;  //ToDo specify target table name
+        this.tableName = tableName;
         try{
-            this.connection = DriverManager.getConnection(url,username,password);
+            this.connection = DriverManager.getConnection( properties.getProperty("url")
+                                                          ,properties.getProperty("username")
+                                                          ,properties.getProperty("password"));
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
     }
     public void insertTable(HashMap<String, Object> jsonData) throws SQLException {
+        String tableName;
         String insertQuery = "insert into " + tableName +
                 " (Region, Country, Item_Type, Sales_Channel, Order_Priority, Order_Date, Order_ID, Ship_Date, Units_Sold, Unit_Price, Unit_Cost, Total_Revenue, Total_Cost, Total_Profit) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
@@ -57,7 +51,6 @@ public class DatabaseManager {
     public ResultSet getTableData(String tableName) throws SQLException {
         String selectQuery = "select * from " + tableName + ";";
         PreparedStatement selectStatement = connection.prepareStatement(selectQuery);
-        ResultSet resultSet = selectStatement.executeQuery();
-        return  resultSet;
+        return selectStatement.executeQuery();
     }
 }
