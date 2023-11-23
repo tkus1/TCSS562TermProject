@@ -2,16 +2,15 @@ package lambda;
 
 import java.sql.*;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 public class DatabaseManager {
 
-    private String url;
-    private String username;
-    private String driver;
-    private String tableName;
-    private String password;
+    private final String url;
+    private final String username;
+    private final String driver;
+    private final String tableName;
+    private final String password;
     private Connection connection;
     private static HashMap<String, String> S3TableMap;  //ToDo list table name in S3
 
