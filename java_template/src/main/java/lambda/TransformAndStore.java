@@ -46,7 +46,9 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
         //Create and populate a separate response object for function output. (OPTIONAL)
         lambda.Response response = (lambda.Response) new lambda.Response();
         inspector.consumeResponse(response);
-        String tableName = "tableName";//ToDo specify table name
+        String tableName = "tableName";     //ToDo specify table name
+        String bucketName = "bucketName";   //ToDo specify bucket name
+        String filePath = "filePath";       //ToDo specify file path
         try
         {
             Properties properties = new Properties();
@@ -54,6 +56,7 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
             DatabaseManager databaseManager = new DatabaseManager(properties, tableName);
             databaseManager.insertTable(request);
             ResultSet resultSet = databaseManager.getTableData(tableName);
+            StorageManager strageManager = new StorageManager(bucketName, filePath);
             response.setValue((String) request.get("Region"));
 
 
