@@ -21,7 +21,7 @@ public class DatabaseManager {
         }
     }
     public void insertTable(HashMap<String, Object> jsonData) throws SQLException {
-        String tableName;
+
         String insertQuery = "insert into " + tableName +
                 " (Region, Country, Item_Type, Sales_Channel, Order_Priority, Order_Date, Order_ID, Ship_Date, Units_Sold, Unit_Price, Unit_Cost, Total_Revenue, Total_Cost, Total_Profit) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
