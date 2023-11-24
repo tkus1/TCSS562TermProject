@@ -6,6 +6,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import saaf.Inspector;
 
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -33,38 +35,60 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
         // Create logger
         LambdaLogger logger = context.getLogger();
         //Collect initial data.
+        System.out.println("Logger new done");
         Inspector inspector = new Inspector();
+        System.out.println("Inspector new done");
         inspector.inspectAll();
-        
+        System.out.println("done inspectAll");
         //****************START FUNCTION IMPLEMENTATION*************************
 
 
         //Add custom key/value attribute to SAAF's output. (OPTIONAL)
+        ;
         inspector.addAttribute("message", "Hello " + request.get("Region")
                 + "! This is a custom attribute added as output from SAAF!");
-        
+        System.out.println("message hello done");
         //Create and populate a separate response object for function output. (OPTIONAL)
-        lambda.Response response = (lambda.Response) new lambda.Response();
-        inspector.consumeResponse(response);
-        String tableName = "tableName";     //ToDo specify table name
-        String bucketName = "bucketName";   //ToDo specify bucket name
-        String filePath = "filePath";       //ToDo specify file path
+        Response response = new Response();
+        System.out.println("response new done");
+        response.setValue("Region is " + request.get("Region"));
+        System.out.println("response.setValue done");
+        //inspector.consumeResponse(response);
+        System.out.println("consumeResponse done");
+        String tableName = "salesRecordTab";     //ToDo specify table name
+        String bucketName = "bucketNameS3";   //ToDo specify bucket name
+        String filePath = "filePathS3";       //ToDo specify file path
+        System.out.println("set String variables");
+        System.out.println(request.get("Region"));
+        System.out.println("underscore" + request.get("Item_Type"));
+        System.out.println("blank" + request.get("Item Type"));
         try
         {
             Properties properties = new Properties();
-            properties.load(new FileInputStream("db.properties"));
+            try (InputStream input = getClass().getClassLoader().getResourceAsStream("db.properties")) {
+                if (input == null) {
+                    System.out.println("unable to find db.properties");
+                }
+                properties.load(input);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("break1");
             DatabaseManager databaseManager = new DatabaseManager(properties, tableName);
+            System.out.println("Inserting table...");
             databaseManager.insertTable(request);
+            System.out.println("break3");
             ResultSet resultSet = databaseManager.getTableData(tableName);
-            StorageManager strageManager = new StorageManager(bucketName, filePath);
+            StorageManager storageManager = new StorageManager(bucketName, filePath);
             response.setValue((String) request.get("Region"));
-
+            System.out.println("break4");
 
         }
         catch (Exception e)
         {
-            logger.log("Got an exception working with MySQL! ");
-            logger.log(e.getMessage());
+            System.out.println(e.toString());
+        //    logger.log("Got an exception working with MySQL! ");
+        //    logger.log(e.getMessage());
         }
 
         //Print log information to the Lambda log as needed

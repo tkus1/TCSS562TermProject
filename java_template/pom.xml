@@ -18,6 +18,11 @@
             <version>2.8.5</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.22</version>
+        </dependency>
+        <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-s3</artifactId>
             <version>1.12.332</version>
@@ -52,6 +57,7 @@
             <directory>src/main/resources</directory>
             <includes>
                 <include>**/*.jpg</include>
+                <include>**/*.properties</include>
             </includes>
         </resource>
     </resources>
