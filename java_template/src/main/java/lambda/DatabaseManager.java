@@ -30,8 +30,7 @@ public class DatabaseManager {
         //set order processing time
         java.sql.Date orderDate = convertStringToSqlDate((String) jsonData.get("Order Date"));
         java.sql.Date shipDate = convertStringToSqlDate((String) jsonData.get("Ship Date"));
-        //java.sql.Date orderDate = java.sql.Date.valueOf((String) jsonData.get("Order Date"));
-        //java.sql.Date shipDate = java.sql.Date.valueOf((String) jsonData.get("Ship Date"));
+
         long differenceInMillis = shipDate.getTime() - orderDate.getTime();
         long differenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
         int orderProcessingTime =(int) differenceInDays;
@@ -56,9 +55,9 @@ public class DatabaseManager {
         //calculate gross margin from total profit and total revenue;
         Float totalRevenue = Float.parseFloat((String) jsonData.get("Total Revenue"));
         Float totalProfit  = Float.parseFloat((String) jsonData.get("Total Profit"));
-        Float grossMargin  = totalRevenue/totalProfit;
+        Float grossMargin  = totalProfit/totalRevenue;
 
-        String insertQuery = "insert into " + tableName +
+        String insertQuery = "insert ignore into " + tableName +
                 " (Region, Country, Item_Type, Sales_Channel, Order_Priority, Order_Date, Order_ID, Ship_Date, Order_Processing_Time, Units_Sold, Unit_Price, Unit_Cost, Total_Revenue, Total_Cost, Total_Profit, GROSS_Margin) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?);";
         PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
