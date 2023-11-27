@@ -1,20 +1,18 @@
 package lambda;
 
+
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 public class DatabaseManager {
 
     private Connection connection;
-    private final String tableName;
 
 
-    public DatabaseManager(Properties properties, String tableName) {
+    public DatabaseManager(Properties properties) {
         System.out.println("DatabaseManager constructor invoked");
-        this.tableName = tableName;
         System.out.println("set tableName");
         System.out.println(properties.getProperty("url") + properties.getProperty("username") + properties.getProperty("password"));
         try{
@@ -26,7 +24,7 @@ public class DatabaseManager {
             System.out.println(e.getMessage());
         }
     }
-    public void insertTable(HashMap<String, Object> jsonData) throws SQLException {
+    public void insertTable(HashMap<String, Object> jsonData, String tableName) throws SQLException {
         //set order processing time
         java.sql.Date orderDate = convertStringToSqlDate((String) jsonData.get("Order Date"));
         java.sql.Date shipDate = convertStringToSqlDate((String) jsonData.get("Ship Date"));
@@ -89,18 +87,123 @@ public class DatabaseManager {
     }
     private java.sql.Date convertStringToSqlDate(String dateString) {
         try {
-            // フォーマットを指定して SimpleDateFormat インスタンスを作成
+
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
 
-            // 文字列を Date オブジェクトに変換
+
             java.util.Date utilDate =  dateFormat.parse(dateString);
 
-            // utilDate から java.sql.Date に変換
+
             return new java.sql.Date(utilDate.getTime());
         } catch (ParseException e) {
             e.printStackTrace();
-            // もし例外が発生した場合は、適切にハンドリングしてください。
             return null;
         }
+    }
+
+    public String getDataTableByJSON(HashMap<String, Object> jsonData, String tableName) throws SQLException{
+        ResultSet selectResult = buildQuery(connection, jsonData, tableName).executeQuery();
+        System.out.println("ResultSet created successfully");
+        String jsonResult = convertResultSetToJSONString(selectResult);
+        System.out.println("result string is:" + jsonResult);
+        return jsonResult;
+    }
+    private PreparedStatement buildQuery(Connection connection, HashMap<String, Object> requestData, String tableName) throws SQLException {
+        // HashMapから必要な情報を取得
+        Object columnsObject = requestData.get("columns");
+        List<String> columns;
+        if (columnsObject instanceof String) {
+            // "columns"が単一の文字列の場合
+            columns = Collections.singletonList((String) columnsObject);
+        } else if (columnsObject instanceof List) {
+            // "columns"がリストの場合
+            columns = (List<String>) columnsObject;
+        } else {
+            columns = Collections.emptyList();
+        }
+
+        // create select
+        StringBuilder queryBuilder = new StringBuilder("SELECT ");
+        for (String column : columns) {
+            queryBuilder.append(column).append(", ");
+        }
+        queryBuilder.delete(queryBuilder.length() - 2, queryBuilder.length());
+        queryBuilder.append(" FROM ").append(tableName);
+        System.out.println(queryBuilder.toString());
+
+        // create where
+        if(requestData.keySet().contains("filters")){
+
+            HashMap<String, String> filters = (HashMap<String, String>) requestData.get("filters");
+            queryBuilder.append(" WHERE ");
+            for (HashMap.Entry<String, String> entry : filters.entrySet()) {
+                queryBuilder.append(entry.getKey()).append(" = ").append('"').append(entry.getValue()).append('"').append(" AND ");
+            }
+            queryBuilder.delete(queryBuilder.length() - 5, queryBuilder.length());  // delete the last AND
+        }
+
+        if(requestData.keySet().contains("groupby")){
+
+            Object groupbyObject = requestData.get("groupby");
+            List<String> groupbys;
+            if (groupbyObject instanceof String) {
+                groupbys = Collections.singletonList((String) groupbyObject);
+            } else if (groupbyObject instanceof List) {
+                groupbys = (List<String>) groupbyObject;
+            } else {
+                groupbys = Collections.emptyList();
+            }
+
+            queryBuilder.append(" GROUP BY ");
+            for (String groupby : groupbys) {
+                queryBuilder.append(groupby).append(", ");
+            }
+            queryBuilder.delete(queryBuilder.length() - 2, queryBuilder.length());  // delete the meaningless ", "
+        }
+
+        PreparedStatement preparedStatement = connection.prepareStatement(queryBuilder.toString());
+        System.out.println(queryBuilder.toString());
+
+        return preparedStatement;
+    }
+
+    public String convertResultSetToJSONString(ResultSet resultSet) {
+        try {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            StringBuilder jsonString = new StringBuilder("[");
+            while (resultSet.next()) {
+                Map<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= columnCount; i++) {
+                    String columnName = metaData.getColumnName(i);
+                    Object columnValue = resultSet.getObject(i);
+                    row.put(columnName, columnValue);
+                }
+                jsonString.append(mapToJsonString(row)).append(",");
+            }
+
+            if (jsonString.charAt(jsonString.length() - 1) == ',') {
+                jsonString.deleteCharAt(jsonString.length() - 1);
+            }
+
+            jsonString.append("]");
+            return jsonString.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private String mapToJsonString(Map<String, Object> map) {
+        StringBuilder jsonString = new StringBuilder("{");
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            jsonString.append("\"").append(entry.getKey()).append("\":\"").append(entry.getValue()).append("\",");
+        }
+        if (jsonString.charAt(jsonString.length() - 1) == ',') {
+            jsonString.deleteCharAt(jsonString.length() - 1);
+        }
+        jsonString.append("}");
+        return jsonString.toString();
     }
 }

@@ -59,8 +59,8 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            DatabaseManager databaseManager = new DatabaseManager(properties, tableName);
-            databaseManager.insertTable(request);
+            DatabaseManager databaseManager = new DatabaseManager(properties);
+            databaseManager.insertTable(request, tableName);
 
             ResultSet resultSet = databaseManager.getTableData(tableName);
             CsvUploader csvUploader = new CsvUploader(bucketName, filePath);
