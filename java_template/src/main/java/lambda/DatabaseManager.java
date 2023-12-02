@@ -28,10 +28,15 @@ public class DatabaseManager {
         //set order processing time
         java.sql.Date orderDate = convertStringToSqlDate((String) jsonData.get("Order Date"));
         java.sql.Date shipDate = convertStringToSqlDate((String) jsonData.get("Ship Date"));
-
-        long differenceInMillis = shipDate.getTime() - orderDate.getTime();
-        long differenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
-        int orderProcessingTime =(int) differenceInDays;
+        int orderProcessingTime;
+        if(jsonData.get("Order Processing Time") == null){
+            long differenceInMillis = shipDate.getTime() - orderDate.getTime();
+            long differenceInDays = differenceInMillis / (24 * 60 * 60 * 1000);
+            orderProcessingTime =(int) differenceInDays;
+        }else{
+            System.out.println(jsonData.get("Order Processing Time"));
+            orderProcessingTime = Integer.valueOf((String) jsonData.get("Order Processing Time"));
+        }
         //Transform order_priority
         String orderPriority;
         switch ((String)jsonData.get("Order Priority")){
@@ -48,7 +53,7 @@ public class DatabaseManager {
                 orderPriority = "Critical";
                 break;
             default:
-                orderPriority = "Invalid";
+                orderPriority = (String) jsonData.get("Order Priority");
         }
         //calculate gross margin from total profit and total revenue;
         Float totalRevenue = Float.parseFloat((String) jsonData.get("Total Revenue"));
@@ -87,12 +92,15 @@ public class DatabaseManager {
     }
     private java.sql.Date convertStringToSqlDate(String dateString) {
         try {
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-
-
+            SimpleDateFormat dateFormat;
+            if (dateString.contains("/")){
+                dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            }else{
+                dateFormat = new SimpleDateFormat("yyyy-dd-mm");
+            }
+            //SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+            System.out.println(dateString);
             java.util.Date utilDate =  dateFormat.parse(dateString);
-
 
             return new java.sql.Date(utilDate.getTime());
         } catch (ParseException e) {
@@ -109,14 +117,14 @@ public class DatabaseManager {
         return jsonResult;
     }
     private PreparedStatement buildQuery(Connection connection, HashMap<String, Object> requestData, String tableName) throws SQLException {
-        // HashMapから必要な情報を取得
+        // get information from HashMap
         Object columnsObject = requestData.get("columns");
         List<String> columns;
         if (columnsObject instanceof String) {
-            // "columns"が単一の文字列の場合
+            // in case the length of "columns" is 1
             columns = Collections.singletonList((String) columnsObject);
         } else if (columnsObject instanceof List) {
-            // "columns"がリストの場合
+            // in case "columns" is a list
             columns = (List<String>) columnsObject;
         } else {
             columns = Collections.emptyList();
@@ -206,4 +214,39 @@ public class DatabaseManager {
         jsonString.append("}");
         return jsonString.toString();
     }
+    public void updateTableFromCsv(String csvData, String tableName) throws SQLException {
+        // CSVデータを行ごとに分割
+        String[] rows = csvData.split("\n");
+
+        // ヘッダー行を無視してデータを処理
+        HashMap<String, Object> jsonData;
+        for (int i = 1; i < rows.length; i++) {
+            String[] columns = rows[i].split(",");
+
+            // データをHashMapに変換
+            jsonData = new HashMap<>();
+            jsonData.put("Region", columns[0].trim());
+            jsonData.put("Country", columns[1].trim());
+            jsonData.put("Item Type", columns[2].trim());
+            jsonData.put("Sales Channel", columns[3].trim());
+            jsonData.put("Order Priority", columns[4].trim());
+            jsonData.put("Order Date", columns[5].trim());
+            jsonData.put("Order ID", columns[6].trim());
+            jsonData.put("Ship Date", columns[7].trim());
+            jsonData.put("Order Processing Time", columns[8].trim());
+            jsonData.put("Units Sold", columns[9].trim());
+            jsonData.put("Unit Price", columns[10].trim());
+            jsonData.put("Unit Cost", columns[11].trim());
+            jsonData.put("Total Revenue", columns[12].trim());
+            jsonData.put("Total Cost", columns[13].trim());
+            jsonData.put("Total Profit", columns[14].trim());
+            jsonData.put("GROSS Margin", columns[15].trim());
+            // 他の列も同様に追加
+
+            // データテーブルを書き換えるメソッドを呼び出し
+            insertTable(jsonData, tableName);
+        }
+
+    }
+
 }

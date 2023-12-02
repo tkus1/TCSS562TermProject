@@ -65,10 +65,8 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
             ResultSet resultSet = databaseManager.getTableData(tableName);
             CsvUploader csvUploader = new CsvUploader(bucketName, filePath);
             csvUploader.uploadResultSetToS3(resultSet);
-            System.out.println("break3");
 
             response.setValue((String) request.get("Region"));
-            System.out.println("break4");
 
         }
         catch (Exception e)
