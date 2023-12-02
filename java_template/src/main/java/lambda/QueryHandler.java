@@ -11,10 +11,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Properties;
 
-public class QueryHandler implements RequestHandler<HashMap<String, Object>, String> {
+public class QueryHandler implements RequestHandler<HashMap<String, Object>, HashMap<String, Object>> {
 
     @Override
-    public String handleRequest(HashMap<String, Object> request, Context context) {
+    public HashMap<String, Object> handleRequest(HashMap<String, Object> request, Context context) {
         System.out.println("Received request: " + request);
         // Create logger
         LambdaLogger logger = context.getLogger();
@@ -47,7 +47,10 @@ public class QueryHandler implements RequestHandler<HashMap<String, Object>, Str
         try {
             String result = databaseManager.getDataTableByJSON(request,tableName);
             System.out.println("returning result");
-            return result;
+            inspector.addAttribute("result",result);
+            inspector.inspectAllDeltas();
+            return inspector.finish();
+            //return result;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
