@@ -1,0 +1,4 @@
+{
+  "columns": ["Region", "SUM(Units_Sold)"],
+    "groupby": ["Region","Item_Type"]
+}
