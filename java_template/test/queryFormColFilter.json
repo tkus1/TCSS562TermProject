@@ -1,0 +1,7 @@
+{
+  "columns": ["Region", "Item_Type", "Total_Revenue"],
+  "filters": {
+    "Region": "Australia and Oceania",
+    "Item_Type": "Baby Food"
+  }
+}
