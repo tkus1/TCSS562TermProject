@@ -27,8 +27,8 @@ This python script load 100SalesRecords.csv and convert it to 100SalesRecords.js
 
 Under /java_template/test, call:
 
-- loadData.sh
-- time loadData.sh
+- ./loadData.sh
+- time ./loadData.sh
 
 under /java_template/test
 
