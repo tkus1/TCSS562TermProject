@@ -11,7 +11,7 @@
 
   
 
-### Service1
+### Service 1
 Under /java_template/test, call:
 - python3 postCSVData.py
 
@@ -23,7 +23,7 @@ This python script load 100SalesRecords.csv and convert it to 100SalesRecords.js
 
   
 
-### Service2
+### Service 2
 
 Under /java_template/test, call:
 
@@ -38,7 +38,7 @@ This bash script call DataLoader in AWS to load csv data to database (mySQL in R
 
   
 
-### Service3
+### Service 3
 
 Under /java_template/test, call:
 
