@@ -50,3 +50,13 @@ Under /java_template/test, call:
 
 These bash scripts POST HTTP request with query conditions and invoke QueryHandler in Lambda. This Lambda funciton process queries for the database (mySQL in RDS. Table name is SalesRecordTab).
 
+
+
+### Run TLQ Pipeline and Collect Data
+Under /java_template/test, call*:
+- ./execIntelPipeline.sh
+- ./execArmPipeline.sh
+
+*At the moment, they both use the same curl command. So, the user must make sure to specify on AWS Lambda that the architecture is x86 and ARM in order to collect valid data.
+
+These two commands contribute to the building of a CSV file that contains the runtime metrics, hot/cold runtime, and CPU architecture. Inside the bash scripts is a loop that is initalized to run from 0 to 1. However, it can be increased to do large scale testing. These two functions also make sure not to crowd the console which is done by rerouting the console output to a null directory.
