@@ -53,7 +53,7 @@ These bash scripts POST HTTP request with query conditions and invoke QueryHandl
 
 
 ### Run TLQ Pipeline and Collect Data
-Under /java_template/test, call*:
+Under /java_template/test, call:
 - ./execPipeline.sh
 
 This command contributes to the building of a CSV file that contains the runtime metrics, hot/cold runtime, and CPU architecture. Inside the bash scripts is a loop that is initalized to run from 0 to 1. However, it can be increased to do large scale testing. These two functions also make sure not to crowd the console which is done by rerouting the console output to a null directory.
