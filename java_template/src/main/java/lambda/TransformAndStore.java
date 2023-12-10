@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -17,7 +18,7 @@ import java.util.Properties;
  * @author Wes Lloyd
  * @author Robert Cordingly
  */
-public class TransformAndStore implements RequestHandler<HashMap<String, Object>, HashMap<String, Object>> {
+public class TransformAndStore implements RequestHandler<List<HashMap<String, Object>>, HashMap<String, Object>> {
 
     /**
      * Lambda Function Handler
@@ -26,7 +27,7 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
      * @param context 
      * @return HashMap that Lambda will automatically convert into JSON.
      */
-    public HashMap<String, Object> handleRequest(HashMap<String, Object> request, Context context) {
+    public HashMap<String, Object> handleRequest(List<HashMap<String, Object>> requestList, Context context) {
         // Create logger
         LambdaLogger logger = context.getLogger();
         //Collect initial data.
@@ -35,14 +36,9 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
         inspector.inspectAll();
         //****************START FUNCTION IMPLEMENTATION*************************
 
-
-        //Add custom key/value attribute to SAAF's output. (OPTIONAL)
-        ;
-        inspector.addAttribute("message", "Hello " + request.get("Region")
-                + "! This is a custom attribute added as output from SAAF!");
+        inspector.addAttribute("message", "Hello ! This is a custom attribute added as output from SAAF!");
         //Create and populate a separate response object for function output. (OPTIONAL)
         Response response = new Response();
-        response.setValue("Region is " + request.get("Region"));
         //inspector.consumeResponse(response);
         String tableName = "salesRecordTab";
         String bucketName = "term-project-tcss562.team7";
@@ -60,13 +56,19 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
                 e.printStackTrace();
             }
             DatabaseManager databaseManager = new DatabaseManager(properties);
-            databaseManager.insertTable(request, tableName);
+            for (HashMap<String, Object> request :requestList){
+                System.out.println(request.get("Region"));
+
+                databaseManager.insertTable(request, tableName);
+            }
+
 
             ResultSet resultSet = databaseManager.getTableData(tableName);
+            System.out.println(resultSet.toString());
             CsvUploader csvUploader = new CsvUploader(bucketName, filePath);
             csvUploader.uploadResultSetToS3(resultSet);
 
-            response.setValue((String) request.get("Region"));
+            //response.setValue((String) request.get("Region"));
 
         }
         catch (Exception e)
@@ -79,6 +81,8 @@ public class TransformAndStore implements RequestHandler<HashMap<String, Object>
         //Print log information to the Lambda log as needed
         logger.log("log message...");
         //inspector.consumeResponse(response);
+
+
         //****************END FUNCTION IMPLEMENTATION***************************
                 
         //Collect final information such as total runtime and cpu deltas.
