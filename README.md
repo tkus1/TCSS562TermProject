@@ -54,9 +54,6 @@ These bash scripts POST HTTP request with query conditions and invoke QueryHandl
 
 ### Run TLQ Pipeline and Collect Data
 Under /java_template/test, call*:
-- ./execIntelPipeline.sh
-- ./execArmPipeline.sh
+- ./execPipeline.sh
 
-*At the moment, they both use the same curl command. So, the user must make sure to specify on AWS Lambda that the architecture is x86 and ARM in order to collect valid data.
-
-These two commands contribute to the building of a CSV file that contains the runtime metrics, hot/cold runtime, and CPU architecture. Inside the bash scripts is a loop that is initalized to run from 0 to 1. However, it can be increased to do large scale testing. These two functions also make sure not to crowd the console which is done by rerouting the console output to a null directory.
+This command contributes to the building of a CSV file that contains the runtime metrics, hot/cold runtime, and CPU architecture. Inside the bash scripts is a loop that is initalized to run from 0 to 1. However, it can be increased to do large scale testing. These two functions also make sure not to crowd the console which is done by rerouting the console output to a null directory.
