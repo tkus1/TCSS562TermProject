@@ -11,7 +11,7 @@
 
   
 
-### Service1
+### Service 1
 Under /java_template/test, call:
 - python3 postCSVData.py
 
@@ -23,12 +23,12 @@ This python script load 100SalesRecords.csv and convert it to 100SalesRecords.js
 
   
 
-### Service2
+### Service 2
 
 Under /java_template/test, call:
 
-- loadData.sh
-- time loadData.sh
+- ./loadData.sh
+- time ./loadData.sh
 
 under /java_template/test
 
@@ -38,7 +38,7 @@ This bash script call DataLoader in AWS to load csv data to database (mySQL in R
 
   
 
-### Service3
+### Service 3
 
 Under /java_template/test, call:
 
@@ -50,3 +50,10 @@ Under /java_template/test, call:
 
 These bash scripts POST HTTP request with query conditions and invoke QueryHandler in Lambda. This Lambda funciton process queries for the database (mySQL in RDS. Table name is SalesRecordTab).
 
+
+
+### Run TLQ Pipeline and Collect Data
+Under /java_template/test, call:
+- ./execPipeline.sh
+
+This command contributes to the building of a CSV file that contains the runtime metrics, hot/cold runtime, and CPU architecture. Inside the bash scripts is a loop that is initalized to run from 0 to 1. However, it can be increased to do large scale testing. These two functions also make sure not to crowd the console which is done by rerouting the console output to a null directory.

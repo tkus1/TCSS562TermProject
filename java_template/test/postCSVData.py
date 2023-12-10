@@ -3,6 +3,8 @@ import requests
 import csv
 
 def post_json_data(json_file_path, url):
+    print("Invoking Transform Step:")
+
     with open(json_file_path, 'r') as json_file:
         json_data = json.load(json_file)
 
@@ -23,8 +25,8 @@ def csv_to_json(csv_file_path, json_file_path):
     with open(json_file_path, 'w') as json_file:
         json_file.write(json_data)
 
-csv_file_path = '100SalesRecords.csv'
-json_file_path = '100SalesRecords.json'
+csv_file_path = '10SalesRecords.csv'
+json_file_path = '10SalesRecords.json'
 csv_to_json(csv_file_path, json_file_path)
     
 url = 'https://2sfqufzf56.execute-api.us-east-2.amazonaws.com/testDeploy'
