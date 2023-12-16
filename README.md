@@ -19,7 +19,7 @@ Under /java_template/test, call:
 
 under /java_template/test
   
-This python script load 100SalesRecords.csv and convert it to 100SalesRecords.json and POST the json data one line at a time. This script call TramsformAndStore in AWS Lambda, transforming data and storing the transformed data to a csv file in S3. Bucket name and file path are specified in the source code of TransformAndStore.
+This python script load 10000SalesRecords.csv and convert it to 10000SalesRecords.json and POST the json data one line at a time. This script call TramsformAndStore in AWS Lambda, transforming data and storing the transformed data to a csv file in S3. Bucket name and file path are specified in the source code of TransformAndStore.
 
   
 
