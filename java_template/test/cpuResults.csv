@@ -1,0 +1,4 @@
+CPU Architecture,Is Container Hot?,Service 1 Runtime (ms),Service 2 Runtime (ms),Query 1 Runtime (ms),Query 2 Runtime (ms),Query 3 Runtime (ms),Total Runtime (ms)
+Intel,false,14493,19340,4073,508,447,38861
+ARM,false,13500,21127,3792,538,635,39592
+ARM,false,25004,17440,3889,513,475,47321
